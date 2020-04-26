@@ -1,0 +1,207 @@
+<div id="turnDiv" class="component" style="display:none">
+  <div class="row lighten-3" id="turnTitleDiv">
+    <div class="col s12 center-align title" id="turnTitle"></div>
+  </div>
+  <div class="row teal lighten-5 valign-wrapper">
+    <div id="turnRoundInfo" class="col s8 m10 left-align"></div>
+    <div class="col s2 m1 center-align teal lighten-3" style="margin:2px;" id="turnCount"></div>
+    <div class="col s2 m1 center-align teal lighten-3" style="margin:2px;" ><div id="timerDiv"></div></div>
+  </div>
+  <div class="row card teal lighten-5">
+    <h5><b><div id="currentWordDiv" class="col s12 center-align"></div></b></h5>
+  </div>
+  <div class="row teal lighten-5">
+    <div class="col s12 center-align">
+      <a class="a-turn-next waves-effect waves-light btn"><i class="material-icons left">check</i>My Team Guessed It</a>
+    </div>
+    <div class="col s12 center-align">
+      <a class="a-turn-end waves-effect waves-light btn" style="display:none"><i class="material-icons left">do_not_disturb</i>End Turn</a>
+    </div>
+  </div>
+</div>
+
+<script> 
+  function initTurn() {
+    $('.a-turn-next').click( nextWord );
+    
+    $('.a-turn-end').click( function(){
+      _appState.turnState.timeLeft = 0;
+      setupNextRound();
+    });
+  }
+  
+  function showTurn() {
+    showProgress();
+    refreshAppStateWithCallback(turnDataReady);
+  }
+  
+  var _currentRound = -1;
+  function turnDataReady(appStateString) {
+    updateAppState( appStateString );
+    hideAll();
+    
+    _currentRound = getCurrentRound();
+    console.log("_currentRound",_currentRound);
+    if( _currentRound < 0 ){
+      M.toast({html: 'Game not ready'});
+      showHome();
+      return;
+    }
+    
+    if( _appState.turnState.isRunning ){
+      M.toast({html: 'Turn already in progress'});
+      showHome();
+      return;
+    }
+    
+    showProgress();
+    google.script.run
+       .withSuccessHandler(startTurnCallback)
+       .startTurn();
+  }
+  
+  function startTurnCallback(isTurn){
+    hideAll();
+    _appState.turnState.isRunning = isTurn;
+    if( !_appState.turnState.isRunning ){
+      M.toast({html: 'Turn already in progress'});
+      showHome();
+      return;
+    }
+    
+    var turnIndex = _appState.turnState.teamIndex;
+    var notTurnIndex = (turnIndex + 1) % 2;
+    
+    $('#turnTitleDiv').removeClass(_appState.teams[notTurnIndex].color);
+    $('#turnTitleDiv').addClass(_appState.teams[turnIndex].color);
+    
+    $('.a-turn-next').show();
+    $('.a-turn-end').hide();
+    $("#timerDiv").show();
+    $("#turnRoundInfo").html(_appState.rounds[_currentRound].desc);
+    $("#turnTitle").html( "<b>"+_appState.teams[_appState.turnState.teamIndex].name + "</b> turn");
+    startTurn();
+  }
+  
+  var _currentIndex = 0;
+  var _entryIndexes;
+  
+  function startTurn(){    
+    _entryIndexes = getTurnEntryIndexes();
+    console.log("_entryIndexes",_entryIndexes);
+    _currentIndex = 0;
+    
+    showCurrentWord();
+    
+    resetTime();
+    $('#turnDiv').show();
+    startTimer();
+  }
+  
+  var _timerInterval;
+  
+  function resetTime() {
+     $("#timerDiv").html( _appState.turnState.timeLeft + "s" );
+  }
+  
+  function showCurrentWord() {
+    var index = _entryIndexes[_currentIndex];
+    var currentWord = _appState.entries[index].word;
+    console.log("currentWord", currentWord);
+    
+    $("#currentWordDiv").html(currentWord);
+    
+    $("#turnCount").html("+"+_currentIndex+"pts");
+  }
+  
+  function startTimer() {
+    _timerInterval=setInterval(updateTime, 1000); //1000 will  run it every 1 second
+  }
+  
+  function endTimer() {
+    clearInterval(_timerInterval);
+    beep();
+    $('.a-turn-end').show();
+    M.toast({html: "Time is up!"});
+  }
+  
+  function updateTime() {
+    _appState.turnState.timeLeft--;
+    $("#timerDiv").html(_appState.turnState.timeLeft + "s");
+    if (_appState.turnState.timeLeft <= 0) {
+      endTimer();
+      return;
+    }
+  }
+  
+  function nextWord() {
+    _currentIndex++;
+    if( _appState.turnState.timeLeft <= 0 ) {
+      setupNextRound();
+    } else if( _currentIndex < _entryIndexes.length ){
+      showCurrentWord();
+    } else {
+      clearInterval(_timerInterval);
+      setupNextRound();
+    }
+  }
+  
+  function setupNextRound() {
+    showResults();
+    syncTurnWithGameData();
+    showProgress();
+  }
+  
+  function showResults() {
+    $('.a-turn-next').hide();
+    $('.a-turn-end').hide();
+    $("#timerDiv").hide();
+    var result = "You earned your team " + _currentIndex + " points! "
+    
+    if( _appState.turnState.timeLeft > 0 && _currentRound < 2 ){
+      var timeLeft = _appState.turnState.timeLeft;
+      if( _currentIndex + 1 >= _entryIndexes.length ) {
+        timeLeft = Math.min(timeLeft,_appState.rounds[_currentRound+1].roundLength);
+      }
+      result += "<br>You have " + timeLeft + " seconds left";
+    }
+     
+    M.toast({html: result});
+  }
+  
+  function syncTurnWithGameData() {
+    var entries = [];
+    for( var i = 0; i < _currentIndex; i++ ){
+      entries.push( _entryIndexes[i] );  
+    }
+    
+    var teamName = _appState.teams[_appState.turnState.teamIndex].name;
+    google.script.run
+       .withSuccessHandler(turnEndSuccessful)
+       .endTurn(entries, teamName, _currentRound,_appState.turnState.timeLeft);
+  }
+  
+  function turnEndSuccessful(){
+    showHome();
+  }  
+  
+  function shuffle(array) {
+    var currentIndex = array.length, temporaryValue, randomIndex;
+  
+    // While there remain elements to shuffle...
+    while (0 !== currentIndex) {
+  
+      // Pick a remaining element...
+      randomIndex = Math.floor(Math.random() * currentIndex);
+      currentIndex -= 1;
+  
+      // And swap it with the current element.
+      temporaryValue = array[currentIndex];
+      array[currentIndex] = array[randomIndex];
+      array[randomIndex] = temporaryValue;
+    }
+  
+    return array;
+  }
+
+</script>

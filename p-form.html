@@ -1,0 +1,127 @@
+<div class="row component" id="formDiv" style="display:none">
+  <div class="row">
+    <div class="col s12 center-align teal lighten-5">
+      <b>Add 3 familiar words or phrases</b><br>to the <i>Fishbowl</i>
+    </div>
+  </div>
+  <form class="col s12" autocomplete="off">
+    <div class="row">
+      <div class="input-field col s12">
+        <i class="material-icons prefix">account_circle</i>
+        <input id="word1" type="text" class="validate words" required autocomplete="off">
+        <label for="word1">Familiar Word or Phrase 1</label>
+      </div>
+      <div class="input-field col s12">
+        <i class="material-icons prefix">account_circle</i>
+        <input id="word2" type="text" class="validate words" required autocomplete="off">
+        <label for="word2">Familiar Word or Phrase 2</label>
+      </div>
+      <div class="input-field col s12">
+        <i class="material-icons prefix">account_circle</i>
+        <input id="word3" type="text" class="validate words" required autocomplete="off">
+        <label for="word3">Familiar Word or Phrase 3</label>
+      </div>
+      <div class="input-field col s12" id="formBtnDiv" style="display:none">
+        <a class="waves-effect waves-light btn" id="formBtn"><i class="material-icons left">chevron_right</i>Submit</a>
+      </div>
+    </div>
+  </form>
+</div>
+
+<script>
+
+  function isFormInputValid(){
+    var words = $(".words");
+    for ( var i = 0; i < words.length; i++) {
+      if( ! words[i].checkValidity() ) {
+        return false;
+      }
+    }
+    return true;
+  }
+  
+  function initForm()
+  {
+    $('.words').bind( "propertychange change click keyup input paste", updateFormBtn );
+    
+    $('#formBtn').click( function(){
+      if( !isFormInputValid() ){ return; }
+      
+      addWords( );           
+      $('.words').val('');
+    } );
+  }
+  
+  function showForm() {
+    showProgress();
+    $('.words').val('');
+    $('#formBtnDiv').hide();
+    refreshAppStateWithCallback(formDataReady);
+  }
+  
+  function formDataReady(appStateString) {
+    updateAppState( appStateString );
+    hideAll();
+    if( hasGameStarted() ) {
+      M.toast({html: 'Game has already started'});
+      showHome();
+    } else {
+      $('#formDiv').show();
+    }
+  }
+  
+  function updateFormBtn() {
+    if( isFormInputValid() ){
+      $('#formBtnDiv').show();
+    } else {
+      $('#formBtnDiv').hide();
+    }
+  }
+
+  
+  function addWords() {
+    showProgress();
+    
+    var entries = [];
+    var wordElements = $(".words");
+    for ( var i = 0; i < wordElements.length; i++) {
+      var word = wordElements[i].value;
+      entries.push(createEntry(word));
+    }
+    
+    console.log( "addWords", entries );
+    google.script.run
+       .withSuccessHandler(entriesAdded)
+       .addEntries(entries);
+       
+    showProgress();
+  }
+  
+  function createEntry(word) {
+    var entry = {};
+    entry.word = word;
+    entry.guessers = ["","",""];
+    return entry;
+  }
+  
+  function entriesAdded(words){
+    if( words == null ) {
+      M.toast({html: 'Unable to add words to the game.'});
+    } else {
+      var text = '';
+       for( var i = 0; i < words.length; i++) {
+         text += '"' + words[i] + '"';
+         if ( i + 1 < words.length ) {
+           text += ', ';
+         }
+         if ( i + 2 == words.length ) {
+           text += ' and ';
+         }
+       }
+       text += ' was added to the fishbowl!';
+       M.toast({html: text });
+     }
+     showHome();        
+  }
+
+</script>

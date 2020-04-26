@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+  <?!= include('i-head'); ?>
+  <body>
+    <?!= includeTemplate("i-header"); ?>
+    <div class="container" id="appContainer">
+      <?!= include('p-progress'); ?>
+      <?!= includeTemplate('p-admin'); ?>
+      <?!= include('p-form'); ?>
+      <?!= include('p-turn'); ?>
+      <?!= include('p-room'); ?>
+      <?!= include('p-door'); ?>
+      <?!= include('p-gate'); ?>
+    
+    </div>
+    <?!= includeTemplate('js-app'); ?>
+    <?!= include('js-sound'); ?>
+  </body>
+</html>

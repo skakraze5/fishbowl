@@ -1,0 +1,33 @@
+<nav>
+  <div class="nav-wrapper">
+    <a class="brand-logo a-home">Fish Bowl</a>
+    <a data-target="mobile-demo" class="sidenav-trigger"><i class="material-icons">menu</i></a>
+    <ul class="right hide-on-med-and-down">
+      <li><a class="a-admin">Admin</a></li>
+    </ul>
+  </div>
+</nav>
+<ul class="sidenav" id="mobile-demo">
+  <li><a class="a-admin">Admin</a></li>
+</ul>
+
+<script>
+  function initHeader() {
+    $('.sidenav')
+      .sidenav()
+      .on('click tap', 'li a', () => {
+            $('.sidenav').sidenav('close');
+        });
+    initNavLinks();
+  }
+  
+  function initNavLinks(){
+    $('.a-home').click(  function(){ showHome();  });
+    $('.a-admin').click( function(){ showAdmin(); });
+    $('.a-form').click(  function(){ showForm();  }) ;
+    $('.a-turn').click(  function(){ showTurn();  }) ;
+    $('.a-room').click(  function(){ showRoom();  }) ;
+    $('.a-door').click(  function(){ showDoor();  }) ;
+  }
+
+</script>

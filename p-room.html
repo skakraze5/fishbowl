@@ -1,0 +1,137 @@
+<div id="roomDiv" class="component" style="display:none">
+
+  <div class="row valign-wrapper">
+    <div class="col s12 left-align title">
+      <b>Game Room</b>
+    </div>
+  </div>
+  
+  <div class="row teal lighten-5" >
+    <div class="col s10 m11 left-align"><span id="roomGameInfo" class="flow-text"></span></div>
+    <div class="col s2 m1 center-align teal lighten-3" id="wordsGuessed"> 
+      <div class="circle">
+        <div class="fill" id="wordsGuessedFill"></div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="row" >
+    <div class="lighten-3 " id="team1ContentDiv">
+      <div class="row valign-wrapper">
+        <div class="col s12 left-align m25_0" >
+          <span id="team1Content" class="flow-text"></span>
+        </div>
+        <div class="col s2 m1 center-align roomBtn turnBtn team1Turn turnTime"></div>
+        <div class="col s2 m1 center-align roomBtn turnBtn team1Turn">
+          <a class="a-room-turn btn-floating pulse"><i class="material-icons">play_circle_outline</i></a>
+        </div>
+      </div>
+    </div>  
+    <div class="lighten-3" id="team2ContentDiv">
+      <div class="row valign-wrapper">
+        <div class="col s12 left-align m25_0" >
+          <span id="team2Content" class="flow-text"></span>
+        </div>
+        <div class="col s2 m1 center-align roomBtn turnBtn team2Turn turnTime"></div>
+        <div class="col s2 m1 center-align roomBtn turnBtn team2Turn" >
+          <a class="a-room-turn btn-floating pulse"><i class="material-icons">play_circle_outline</i></a>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="row" id="playerSuggestionDiv">
+    <div class="col s6 left-align teal lighten-5">Current Player:</div>
+    <div class="col s6 right-align teal lighten-3" id="playerSuggestion"> 
+    </div>
+  </div>
+</div>
+
+<script> 
+  var _roomTimerInterval;
+  
+  function initRoom() {        
+    $('.a-room-turn').click( function(){ 
+      $('.turnBtn').hide();
+      showTurn();
+    } );
+    
+    _roomTimerInterval = setInterval(silentlyRefreshRoom, 5000); // will run it every 5 seconds
+  }
+  
+  function silentlyRefreshRoom() {
+    if( $("#roomDiv").is(":visible") ) {
+      refreshAppStateWithCallback(roomDataReady);
+    }
+  }
+  
+  function showRoom() {
+    showProgress();
+    refreshAppStateWithCallback(roomDataReady);
+  }
+  
+  function roomDataReady(appStateString){
+    updateAppState( appStateString );
+    hideAll();
+    
+    if( !hasGameStarted() ) {
+      showHome();
+      return;
+    } 
+    
+    $('#roomDiv').show();
+    
+    $('#team1Content').html(_appState.teams[0].name + " Score: " + getScore(0) );
+    $('#team2Content').html(_appState.teams[1].name + " Score: " + getScore(1) );
+    
+    $('#team1ContentDiv').addClass(_appState.teams[0].color);
+    $('#team2ContentDiv').addClass(_appState.teams[1].color);
+    
+    var fillPercent = 100 * getTurnEntryIndexes().length / _appState.entries.length;
+    $('#wordsGuessedFill').height( fillPercent + "%");
+    
+    $('.roomBtn').hide();
+    $('#playerSuggestionDiv').hide();
+    
+    if( isGameOver() ) {
+      $('#roomGameInfo').html("<h2>Game over</h2>");
+      return;
+    }
+    
+    if( _appState.entries.length > 0 ){
+      var info = _appState.rounds[getCurrentRound()].desc + "<br>";
+      $('#roomGameInfo').html(info);
+    }
+    
+    if( _appState.turnState.isRunning || _appState.entries.length == 0 ) {
+      return;
+    }
+    
+    $('.turnTime').html(_appState.turnState.timeLeft+"s");
+    
+    if( _appState.turnState.teamIndex == 0 ) {
+      $('.team1Turn').show();
+    } else {
+      $('.team2Turn').show();
+    }
+    
+    var player = currentPlayer();
+    if( player != "" ){
+      $('#playerSuggestionDiv').show();
+      $('#playerSuggestion').html(player);
+    }
+    
+  }
+  
+  function currentPlayer(){
+    var currentTeamIndex = _appState.turnState.teamIndex;
+    var currentPlayerIndex = _appState.teams[currentTeamIndex].playerIndex;
+    var currentTeamPlayers = _appState.teams[currentTeamIndex].players;
+    if( currentPlayerIndex >=  0 && currentPlayerIndex < currentTeamPlayers.length){
+      return currentTeamPlayers[currentPlayerIndex];
+    }
+      
+    return "";
+  }
+
+</script>

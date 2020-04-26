@@ -1,0 +1,57 @@
+<div id="gateDiv" class="component" style="display:none">
+  <div class="row valign-wrapper">
+    <div class="input-field col s10">
+      <i class="material-icons prefix">videogame_asset</i>
+      <input id="gateGameKey" type="text" class="required lowercase" autocomplete="off">
+      <label for="gateGameKey" >Game Password</label>
+    </div>
+    <div class="input-field col s2" id="gateBtnDiv">
+        <a class="btn-floating pulse" id="a-gate-enter"><i class="material-icons">keyboard_return</i></a>
+     </div>
+  </div>  
+</div>
+
+<script> 
+  
+  function initGate() {            
+    
+    $('#a-gate-enter').click( function(){    
+      enterGame();   
+    } );
+    
+  }
+    
+  function showGate() {
+    hideAll();
+    
+    var gameKeyCookie = Cookies.get('gameKey');
+    if( gameKeyCookie ) {
+      $("#gateGameKey").val(gameKeyCookie);
+    }
+    
+    $('#gateDiv').show();
+    M.updateTextFields();
+  }
+  
+  function enterGame() {
+    var gameKey = $("#gateGameKey")[0].value.toLowerCase();
+    Cookies.set('gameKey', gameKey, { expires: 1 });
+    
+    showProgress();
+    google.script.run
+       .withSuccessHandler(enterGameCallback)
+       .enterGame( gameKey );
+  }
+  
+  function enterGameCallback(gameKey){
+    if( gameKey == "" ) {
+      M.toast({html: "That game isn't ready yet"});
+      showGate();
+    } else {
+      _gameKey = gameKey;
+      refreshAppState();
+    }
+    
+  }
+
+</script>

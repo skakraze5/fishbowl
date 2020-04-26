@@ -1,0 +1,82 @@
+<div id="doorDiv" class="component" style="display:none">
+  <div class="row valign-wrapper">
+    <div class="col s9 left-align title">
+      <b>Add Words</b>
+    </div>
+    <div class="col s3 right-align">
+      <a class="a-door-form btn-floating pulse"><i class="material-icons">add_circle_outline</i></a>
+    </div>
+  </div>  
+  <div class="row teal lighten-5 valign-wrapper" >
+    <div class="col s10 m11 left-align"><span id="doorGameInfo" class="flow-text">Game Word Count</span></div>
+    <div class="col s2 m1 center-align teal lighten-3" id="doorNumberOfWords"> 
+    </div>
+  </div>  
+  <div class="row">
+    <div class="col s12 left-align lighten-3" id="doorTeam0ContentDiv"></div>
+  </div>
+  <div class="row">
+    <div class="col s12 left-align lighten-3" id="doorTeam1ContentDiv"></div>
+  </div>
+</div>
+
+<script> 
+  var _doorTimerInterval;
+  
+  function initDoor() {            
+    _doorTimerInterval = setInterval(silentlyRefreshDoor, 5000); // will run it every 5 seconds
+    
+    $('.a-door-form').click( function(){
+      showForm();          
+    } );
+    
+    $('.a-door-startGame').click( function(){
+      startGame( );           
+    } );
+  }
+  
+  function silentlyRefreshDoor() {
+    if( $("#doorDiv").is(":visible") ) {
+      refreshAppStateWithCallback(doorDataReady);
+    }
+  }
+  
+  function showDoor() {
+    showProgress();
+    refreshAppStateWithCallback(doorDataReady);
+  }
+  
+  function doorDataReady(appStateString){
+    updateAppState( appStateString );
+    hideAll();
+    
+    if( hasGameStarted() ) {
+      M.toast({html: "The game is starting!"});
+      showHome();
+      return;
+    } 
+    
+    $('#doorDiv').show();
+    $('#doorNumberOfWords').html(_appState.entries.length);
+    
+      
+    for( var teamIndex = 0; teamIndex < _appState.teams.length; teamIndex++ ) {
+      var divID = '#doorTeam'+teamIndex+'ContentDiv';
+      var team = _appState.teams[teamIndex];
+      $(divID).addClass(team.color);
+      
+      var divHtml = '<b>' + team.name +':</b><br>'
+      var players = team.players;
+      for( var playerIndex = 0; playerIndex < players.length; playerIndex++){
+        divHtml += players[playerIndex] + '<br>'
+      }
+      
+      $(divID).html( divHtml );
+        
+    }
+    
+    
+  }
+  
+
+</script>

@@ -1,0 +1,131 @@
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/js-cookie@rc/dist/js.cookie.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+<script>
+  <?!= include('js-model'); ?>
+  var _appState = {};
+  var _gameKey = "";
+  
+  // Window OnLoad
+  $(function() {
+    initUI();
+    refreshAppState();
+    M.AutoInit();
+  });
+  
+  function initUI() {
+    initHeader(); // i-header.html
+    initAdmin(); // p-admin.html
+    initForm(); // p-form.html
+    initTurn(); // p-turn.html
+    initRoom(); // p-room.html
+    initDoor(); // p-door.html
+    initGate(); // p-gate.html
+  }
+    
+  function hideAll() {
+    $('.component').hide();
+  }
+  
+  function showHome() {
+    if( !isGameKeyValid() ){
+      showGate();
+    } else if( hasGameStarted() ){
+      showRoom();
+    } else {
+      showDoor();
+    }
+  }
+  
+  function getScore(teamIndex){
+    var score = 0;
+    for( var round = 0; round < _appState.rounds.length; round++ ) {
+      for( var i = 0; i < _appState.entries.length; i++ ){
+        if( _appState.entries[i].guessers[round] == _appState.teams[teamIndex].name ){
+          score++;
+        }
+      }
+    }
+    return score;
+  }
+  
+  function isGameOver() {
+    if( _appState.entries.length == 0 ) {
+      return false;
+    }
+    for( var round = 0; round < _appState.rounds.length; round++ ) {
+      for( var i = 0; i < _appState.entries.length; i++ ){
+        if( _appState.entries[i].guessers[round] == "" ){
+          return false;
+        }
+      }
+    }
+    return true;
+  }
+  
+  function hasGameStarted() {
+    return _appState.gameState.started;
+  }
+  
+  function isGameKeyValid() {
+    return (_appState.gameState.key == _gameKey) && (_gameKey != "");
+  }
+                
+  function getCurrentRound(){
+    for( var round = 0; round < _appState.rounds.length; round++ ) {
+      for( var i = 0; i < _appState.entries.length; i++ ){
+        if( _appState.entries[i].guessers[round] == "" ) {
+          return round;
+        }
+      }
+    }  
+    return -1;
+  }
+  
+  function getTurnEntryIndexes() {
+    var currentRound = getCurrentRound();
+    var entryIndexes = [];
+    for( var i = 0; i < _appState.entries.length; i++ ){
+      if( _appState.entries[i].guessers[currentRound] == "" ){
+        entryIndexes.push(i);
+      }
+    }
+    return shuffle(entryIndexes);
+  }
+  
+  function updateAppStateAndShowHome(appStateString){
+    updateAppState( appStateString );
+    showHome();
+  }
+  
+  function updateAppState(appStateString){ 
+    if( appStateString ){
+      _appState = JSON.parse(appStateString);
+    } 
+  }
+  
+  function pushAppState() {
+    pushAppStateWithCallback(updateAppStateAndShowHome);
+  }
+  
+  function pushAppStateWithCallback(callback) {
+    google.script.run
+       .withSuccessHandler(callback)
+       .setAppState(_appState);
+  }
+  
+  function refreshAppState() {
+    refreshAppStateWithCallback(updateAppStateAndShowHome);
+  }
+  
+  function refreshAppStateWithCallback(callback) {
+    google.script.run
+       .withSuccessHandler(callback)
+       .getAppStateAsString();
+  }
+
+</script>
+
+

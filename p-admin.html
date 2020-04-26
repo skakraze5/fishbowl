@@ -1,0 +1,96 @@
+<div id="adminDiv" class="component" style="display:none">
+  <h3>Admin</h3>
+  <div>
+    <a class="a-admin-start-game waves-effect waves-light btn-small"><i class="material-icons small">play_circle_outline</i></a>
+    <a class="a-admin-clear waves-effect waves-light btn-small">Reset Game</a>
+    <a class="a-admin-refresh waves-effect waves-light btn-small">Refresh</a>
+    <a class="a-admin-toggle waves-effect waves-light btn-small">Edit</a>
+    <a class="a-admin-end-turn waves-effect waves-light btn-small">End Turn</a>
+    <a class="a-admin-reset-time waves-effect waves-light btn-small">Reset Time</a>
+  </div>
+  <div id="adminGameContentDiv">
+    <textarea id="adminGameContent"></textarea>
+    <a class="a-admin-submit waves-effect waves-light btn-small">submit</a>
+  </div>
+</div>
+
+<script> 
+
+  function initAdmin() {
+    $('.a-admin-submit').click( function(){ 
+      if( confirm("Are you sure you want to force update the game") ){
+        hideAll(); 
+        var newAppStateString = $('#adminGameContent').val();
+        _appState = JSON.parse(newAppStateString);
+        console.log(newAppStateString);
+        console.log(_appState);
+        pushAppState();
+      }
+    } );
+    
+    $('.a-admin-clear').click( function(){ 
+      if( confirm("Are you sure you want to reset the game") ){
+        hideAll(); 
+        _appState = defaultAppState();
+        pushAppState();
+      }
+    } );
+    
+    $('.a-admin-refresh').click( function(){ 
+      showAdmin();
+    } );
+    
+    $('.a-admin-toggle').click( function(){ 
+      $('#adminGameContent').height("200px");
+      $('#adminGameContentDiv').show();
+      
+    } );
+    
+    $('.a-admin-end-turn').click( function(){ 
+      _appState.turnState.isRunning = false;
+      showProgress();
+      pushAppState();
+    } );
+    
+    $('.a-admin-reset-time').click( function(){ 
+      _appState.turnState.timeLeft = _appState.rounds[getCurrentRound()].roundLength;
+      showProgress();
+      pushAppState();
+    } );
+    
+    $('.a-admin-start-game').click( function(){ 
+      startGame();
+    } );
+  }
+  
+  function showAdmin() {
+    showProgress();
+    refreshAppStateWithCallback(adminDataReady);
+  }
+  
+  function adminDataReady( appStateString ){
+    updateAppState( appStateString );
+    hideAll();
+    $('#adminDiv').show();
+    var appStateString = JSON.stringify(_appState, undefined, 2);
+    console.log(_appState);
+    console.log(appStateString);
+    $('#adminGameContent').val(appStateString);
+    $('#adminGameContentDiv').hide();
+  }
+  
+  function startGame() {
+    showProgress();
+    google.script.run
+       .withSuccessHandler(startGameCallback)
+       .startGame();
+  }
+  
+  function startGameCallback(hasStarted) {
+    if ( !hasStarted ){
+      M.toast({html: "The game can't be started yet"});
+    } 
+    refreshAppState();
+  }
+
+</script>
