@@ -1,10 +1,10 @@
-function defaultAppState() {
+function defaultAppState(gameKey) {
   var appState = {};
   appState.entries = [];
   appState.teams = [createTeam("Team Red", "red"), createTeam("Team Blue", "blue")];
   appState.rounds = createRoundsInfo();
   appState.turnState = createTurnState();
-  appState.gameState = createGameState();
+  appState.gameState = createGameState(gameKey);
 
   return appState;
 }
@@ -41,11 +41,11 @@ function createTurnState() {
   return turnState;
 }
 
-function createGameState() {
+function createGameState(gameKey) {
   var gameState = {};
   gameState.started = false;
   gameState.formCount = 3;
-  gameState.key = "";
+  gameState.key = gameKey;
 
   return gameState;
 }

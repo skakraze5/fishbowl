@@ -1,4 +1,4 @@
-function resetAppState() {
+function resetAppState(gameKey) {
   var lock = LockService.getScriptLock();
   var success = lock.tryLock(10000);
   if (!success) {
@@ -6,7 +6,7 @@ function resetAppState() {
     return false;
   }
   
-  var newAppState = defaultAppState();
+  var newAppState = defaultAppState(gameKey);
   var newDataString = JSON.stringify(newAppState);
   
   var sp = PropertiesService.getScriptProperties();
@@ -30,7 +30,8 @@ function getAppStateAsString() {
   var dataString = sp.getProperty(dataKey());
   
   if( !dataString ) {
-    var appState = defaultAppState();
+    var emptyGameKey = "";
+    var appState = defaultAppState(emptyGameKey);
     dataString = JSON.stringify(appState);
   }
   

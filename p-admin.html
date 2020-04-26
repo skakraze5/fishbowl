@@ -1,5 +1,11 @@
 <div id="adminDiv" class="component" style="display:none">
-  <h3>Admin</h3>
+  <div class="row">
+    <div class="input-field col s12">
+      <i class="material-icons prefix">videogame_asset</i>
+      <input id="adminGameKey" type="text" class="required lowercase" autocomplete="off">
+      <label for="adminGameKey" >Admin Game Key</label>
+    </div>
+  </div>  
   <div>
     <a class="a-admin-start-game waves-effect waves-light btn-small"><i class="material-icons small">play_circle_outline</i></a>
     <a class="a-admin-clear waves-effect waves-light btn-small">Reset Game</a>
@@ -75,6 +81,12 @@
     console.log(appStateString);
     $('#adminGameContent').val(appStateString);
     $('#adminGameContentDiv').hide();
+    
+    var gameKeyCookie = Cookies.get('gameKey');
+    if( gameKeyCookie ) {
+      $("#adminGameKey").val(gameKeyCookie);
+    }
+    M.updateTextFields();
   }
   
   function startGame() {
@@ -92,10 +104,17 @@
   }
   
   function resetGame() {
+    var gameKey = $("#adminGameKey")[0].value.toLowerCase();
+    if(gameKey == ""){
+      M.toast({html: "Please enter valid game key"});
+      return;
+    }
+    Cookies.set('gameKey', gameKey, { expires: 1 });
+    
     showProgress();
     google.script.run
        .withSuccessHandler(resetGameCallback)
-       .resetAppState();
+       .resetAppState(gameKey);
   }
   
   function resetGameCallback(appStateString) {
