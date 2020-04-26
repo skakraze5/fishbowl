@@ -1,3 +1,22 @@
+function resetAppState() {
+  var lock = LockService.getScriptLock();
+  var success = lock.tryLock(10000);
+  if (!success) {
+    Logger.log('Could not obtain lock after 10 seconds.');
+    return false;
+  }
+  
+  var newAppState = defaultAppState();
+  var newDataString = JSON.stringify(newAppState);
+  
+  var sp = PropertiesService.getScriptProperties();
+  sp.setProperty(dataKey(), newDataString);
+  setCachedData(newDataString);
+  
+  lock.releaseLock();
+  return newDataString;
+}
+
 function getAppStateAsString() {
   var cached = getCachedData();
   if( cached != null ) {

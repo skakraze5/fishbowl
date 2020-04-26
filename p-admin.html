@@ -30,9 +30,7 @@
     
     $('.a-admin-clear').click( function(){ 
       if( confirm("Are you sure you want to reset the game") ){
-        hideAll(); 
-        _appState = defaultAppState();
-        pushAppState();
+        resetGame();
       }
     } );
     
@@ -91,6 +89,20 @@
       M.toast({html: "The game can't be started yet"});
     } 
     refreshAppState();
+  }
+  
+  function resetGame() {
+    showProgress();
+    google.script.run
+       .withSuccessHandler(resetGameCallback)
+       .resetAppState();
+  }
+  
+  function resetGameCallback(appStateString) {
+    if ( !appStateString ){
+      M.toast({html: "Reset Game Failed"});
+    } 
+    adminDataReady(appStateString);
   }
 
 </script>
