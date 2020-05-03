@@ -1,14 +1,63 @@
 <div id="endDiv" class="component" style="display:none">
   <div class="row lighten-3" id="">
-    <div class="col s12 center-align" id=""></div>
+    <div class="col s12 center-align" id="">End Turn</div>
+  </div>
+  <div class="row lighten-3" id="endConfirmListDiv">
   </div>
 </div>
 
 <script> 
+  var _endDelayInterval;
+  var _endCountdownInterval;
+  var _endCountdownTime;
+  
   function initEnd() {
   }
   
   function showEnd() {
+    hideAll();
+    showProgress();
+    
+    _endDelayInterval = setInterval(delayedShowEnd, 2500); 
+    updateEndHTML();
+  }
+  
+  function delayedShowEnd() {
+    clearInterval(_endDelayInterval);
+    hideAll();
+    
+    $('#endDiv').show();
+  }
+  
+  function startEndCountdown() {
+    _endCountdownTime = 30;
+    _endCountdownInterval = setInterval(intervalUpdate, 1000); 
+  }
+  
+  function endEndCountdown() {
+    clearInterval(_endCountdownInterval);
+  }
+  
+  function intervalUpdate() {
+    _endCountdownTime--;
+  }
+  
+  function updateEndHTML() {
+    var div = $('#endConfirmListDiv');
+    div.empty();
+    div.append(confirmWordHTML("first word",0));
+    div.append(confirmWordHTML("second word",1));
+  }
+  
+  function confirmWordHTML(word,index) {
+    var html = '';
+    html += '<div class="col s12 left-align">';
+    html += '  <label>';
+    html += '    <input type="checkbox" class="filled-in" checked="checked" id="' + index +'" />';
+    html += '    <span>'+ word +'</span>';
+    html += '  </label>';
+    html += '</div>';
+    return html;
   }
   
 </script>
