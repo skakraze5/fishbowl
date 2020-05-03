@@ -1,49 +1,67 @@
-<div id="endDiv" class="component" style="display:none">
+<div id="confirmDiv" class="component" style="display:none">
   <div class="row lighten-3" id="">
     <div class="col s12 center-align" id="">End Turn</div>
   </div>
-  <div class="row lighten-3" id="endConfirmListDiv">
+  <div class="row lighten-3" id="confirmListDiv"></div>
+  
+  <div class="row lighten-3" id="">
+    <div class="col s12 center-align" id="confirmTimeDiv"></div>
   </div>
 </div>
 
 <script> 
-  var _endDelayInterval;
-  var _endCountdownInterval;
-  var _endCountdownTime;
+  var _confirmDelayInterval;
+  var _confirmCountdownInterval;
+  var _confirmCountdownTime;
   
-  function initEnd() {
+  function initConfirm() {
   }
   
-  function showEnd() {
+  function showConfirm() {
     hideAll();
     showProgress();
     
-    _endDelayInterval = setInterval(delayedShowEnd, 2500); 
-    updateEndHTML();
+    _confirmDelayInterval = setInterval(delayedShowConfirm, 2500); 
+    updateConfirmHTML();
   }
   
-  function delayedShowEnd() {
-    clearInterval(_endDelayInterval);
+  function delayedShowConfirm() {
+    clearInterval(_confirmDelayInterval);
     hideAll();
     
-    $('#endDiv').show();
+    startConfirmCountdown();
+    $('#confirmDiv').show();
   }
   
-  function startEndCountdown() {
-    _endCountdownTime = 30;
-    _endCountdownInterval = setInterval(intervalUpdate, 1000); 
+  function startConfirmCountdown() {
+    _confirmCountdownTime = 10;
+    _confirmCountdownInterval = setInterval(confirmCountdownUpdate, 1000); 
+    
+    updateConfirmTime();
   }
   
-  function endEndCountdown() {
-    clearInterval(_endCountdownInterval);
+  function endConfirmCountdown() {
+    clearInterval(_confirmCountdownInterval);
   }
   
-  function intervalUpdate() {
-    _endCountdownTime--;
+  function confirmCountdownUpdate() {
+    _confirmCountdownTime--;
+    
+    if(_confirmCountdownTime < 0 ){
+      
+      endConfirm();
+      return;
+    }
+    
+    updateConfirmTime();
   }
   
-  function updateEndHTML() {
-    var div = $('#endConfirmListDiv');
+  function updateConfirmTime() {
+    $('#confirmTimeDiv').html(_confirmCountdownTime);
+  }
+  
+  function updateConfirmHTML() {
+    var div = $('#confirmListDiv');
     div.empty();
     div.append(confirmWordHTML("first word",0));
     div.append(confirmWordHTML("second word",1));
@@ -58,6 +76,10 @@
     html += '  </label>';
     html += '</div>';
     return html;
+  }
+  
+  function endConfirm() {
+    endConfirmCountdown();
   }
   
 </script>
