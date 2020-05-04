@@ -3,7 +3,7 @@
 <script src="https://cdn.jsdelivr.net/npm/js-cookie@rc/dist/js.cookie.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 
-<script>
+<script>  
   var _appState = {};
   var _gameKey = "";
   
@@ -82,17 +82,6 @@
       }
     }  
     return -1;
-  }
-  
-  function getTurnEntryIndexes() {
-    var currentRound = getCurrentRound();
-    var entryIndexes = [];
-    for( var i = 0; i < _appState.entries.length; i++ ){
-      if( _appState.entries[i].guessers[currentRound] == "" ){
-        entryIndexes.push(i);
-      }
-    }
-    return shuffle(entryIndexes);
   }
   
   function updateAppStateAndShowHome(appStateString){

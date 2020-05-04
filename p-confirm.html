@@ -63,8 +63,9 @@
   function updateConfirmHTML() {
     var div = $('#confirmListDiv');
     div.empty();
-    div.append(confirmWordHTML("first word",0));
-    div.append(confirmWordHTML("second word",1));
+    for( var i = 0; i < _turnState.data.length; i++ ){
+      div.append(confirmWordHTML(_turnState.data[i].word,i));
+    }
   }
   
   function confirmWordHTML(word,index) {
@@ -80,6 +81,46 @@
   
   function endConfirm() {
     endConfirmCountdown();
+    //syncTurnDataWithGameData();
   }
+  
+  /********
+  function showResults() {
+    $('.a-turn-next').hide();
+    $('.a-turn-end').hide();
+    $("#timerDiv").hide();
+    var result = "You earned your team " + _currentIndex + " points! "
+    
+    if( _appState.turnState.timeLeft > 0 && _currentRound < 2 ){
+      var timeLeft = _appState.turnState.timeLeft;
+      if( _currentIndex + 1 >= _entryIndexes.length ) {
+        timeLeft = Math.min(timeLeft,_appState.rounds[_currentRound+1].roundLength);
+      }
+      result += "<br>You have " + timeLeft + " seconds left";
+    }
+     
+    M.toast({html: result});
+  }
+  
+    ******/
+    
+  function syncTurnDataWithGameData() {
+    var entries = [];
+    for( var i = 0; i < _turnState.data.length; i++ ){
+      if( _turnState.data[i].guessed ){
+        entries.push( _turnState.data[i].gameIndex );
+      }
+    }
+    
+    var teamName = _appState.teams[_appState.turnState.teamIndex].name;
+    google.script.run
+       .withSuccessHandler(endTurnCallback)
+       .endTurn(entries, teamName, getCurrentRound(),_appState.turnState.timeLeft);
+  }
+  
+  function endTurnCallback(){
+    showHome();
+  } 
+
   
 </script>

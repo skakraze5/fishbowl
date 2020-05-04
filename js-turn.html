@@ -1,0 +1,75 @@
+<script>
+  var _turnState = defaultTurnState();
+  
+  function updateTurnState() {
+    _turnState = newTurnState();
+  }
+  
+  function defaultTurnState() {
+    var turnState = {};
+    turnState.data = [createTurnDataEntry("Bob",0)];
+    turnState.index = 0;
+    return turnState;
+  }
+
+  function newTurnState() {
+    var turnState = defaultTurnState();
+    turnState.data = shuffledTurnData();
+  }
+  
+  function shuffledTurnData() {
+    var currentRound = getCurrentRound();
+    var turnData = [];
+    for( var i = 0; i < _appState.entries.length; i++ ){
+      var gameEntry = _appState.entries[i];
+      if( gameEntry.guessers[currentRound] == "" ){
+        turnData.push(createTurnDataEntry(gameEntry.word,i));
+      }
+    }
+    return shuffle(turnData);
+  }
+  
+  function createTurnDataEntry(word,gameIndex) {
+    var turnEntry = {};
+    turnEntry.word = word;
+    turnEntry.gameIndex = gameIndex;
+    turnEntry.guessed = false;
+    return turnEntry;
+  }
+  
+  function currentWord() {
+    if( _turnState.index < _turnState.data.length ){
+      return _turnState.data[_turnState.index].word;
+    } 
+    
+    return "";
+  }
+  
+  function wordGuessed() {
+    _turnState.data[_turnState.index].guessed = true;
+    _turnState.index++;
+  }
+  
+  function turnPoints() {
+    return _turnState.index;
+  }
+  
+  function shuffle(array) {
+    var currentIndex = array.length, temporaryValue, randomIndex;
+  
+    // While there remain elements to shuffle...
+    while (0 !== currentIndex) {
+  
+      // Pick a remaining element...
+      randomIndex = Math.floor(Math.random() * currentIndex);
+      currentIndex -= 1;
+  
+      // And swap it with the current element.
+      temporaryValue = array[currentIndex];
+      array[currentIndex] = array[randomIndex];
+      array[randomIndex] = temporaryValue;
+    }
+  
+    return array;
+  }
+</script>
