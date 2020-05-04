@@ -63,16 +63,20 @@
   function updateConfirmHTML() {
     var div = $('#confirmListDiv');
     div.empty();
-    for( var i = 0; i < _turnState.data.length; i++ ){
-      div.append(confirmWordHTML(_turnState.data[i].word,i));
+    for( var i = 0; i <= _turnState.index; i++ ){
+      var turnEntry = _turnState.data[i];
+      div.append(confirmWordHTML(turnEntry.word,i,turnEntry.guessed));
     }
   }
   
-  function confirmWordHTML(word,index) {
+  function confirmWordHTML(word,index,guessed) {
     var html = '';
     html += '<div class="col s12 left-align">';
     html += '  <label>';
-    html += '    <input type="checkbox" class="filled-in" checked="checked" id="' + index +'" />';
+    if(guessed)
+      html += '    <input type="checkbox" class="filled-in" checked="checked" id="' + index +'" />';
+    else
+      html += '    <input type="checkbox" class="filled-in" id="' + index +'" />';
     html += '    <span>'+ word +'</span>';
     html += '  </label>';
     html += '</div>';
