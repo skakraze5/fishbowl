@@ -1,23 +1,26 @@
 <script>
-  var _turnState = defaultTurnState();
+  var _localTurnState = defaultTurnState();
   
   function updateTurnState() {
-    _turnState = newTurnState();
+    _localTurnState = newTurnState();
   }
   
   function defaultTurnState() {
     var turnState = {};
     turnState.data = [createTurnDataEntry("Bob",0)];
     turnState.index = 0;
+    turnState.round = -1;
     return turnState;
   }
 
   function newTurnState() {
     var turnState = defaultTurnState();
     turnState.data = shuffledTurnData();
+    turnState.round = getCurrentRound();
+    return turnState;
   }
   
-  function shuffledTurnData() {
+  function currentTurnData() {
     var currentRound = getCurrentRound();
     var turnData = [];
     for( var i = 0; i < _appState.entries.length; i++ ){
@@ -26,7 +29,11 @@
         turnData.push(createTurnDataEntry(gameEntry.word,i));
       }
     }
-    return shuffle(turnData);
+    return turnData;
+  }
+  
+  function shuffledTurnData() {
+    return shuffle(currentTurnData());
   }
   
   function createTurnDataEntry(word,gameIndex) {
@@ -34,24 +41,31 @@
     turnEntry.word = word;
     turnEntry.gameIndex = gameIndex;
     turnEntry.guessed = false;
+    turnEntry.skipped = false;
     return turnEntry;
   }
   
   function currentWord() {
-    if( _turnState.index < _turnState.data.length ){
-      return _turnState.data[_turnState.index].word;
+    if( _localTurnState.index < _localTurnState.data.length ){
+      return _localTurnState.data[_localTurnState.index].word;
     } 
     
     return "";
   }
   
   function wordGuessed() {
-    _turnState.data[_turnState.index].guessed = true;
-    _turnState.index++;
+    _localTurnState.data[_localTurnState.index].guessed = true;
+    _localTurnState.index++;
   }
   
   function turnPoints() {
-    return _turnState.index;
+    var points = 0;
+    for( var i = 0; i < _localTurnState.data.length; i++ ){
+      if(_localTurnState.data[i].guessed == true) {
+        points++;
+      }
+    }
+    return points;
   }
   
   function shuffle(array) {

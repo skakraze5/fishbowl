@@ -29,7 +29,6 @@
   
   function turnDataReady(appStateString) {
     updateAppState( appStateString );
-    hideAll();
   
     if( getCurrentRound() < 0 ){
       M.toast({html: 'Game not ready'});
@@ -43,7 +42,6 @@
       return;
     }
     
-    showProgress();
     google.script.run
        .withSuccessHandler(startTurnCallback)
        .startTurn();

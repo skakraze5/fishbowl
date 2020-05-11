@@ -59,15 +59,21 @@
     _roomTimerInterval = setInterval(silentlyRefreshRoom, 5000); // will run it every 5 seconds
   }
   
-  function silentlyRefreshRoom() {
-    if( $("#roomDiv").is(":visible") ) {
-      refreshAppStateWithCallback(roomDataReady);
-    }
-  }
-  
   function showRoom() {
     showProgress();
     refreshAppStateWithCallback(roomDataReady);
+  }
+  
+  function silentlyRefreshRoom() {
+    if( $("#roomDiv").is(":visible") ) {
+      refreshAppStateWithCallback(silentRoomDataReady);
+    }
+  }
+  
+  function silentRoomDataReady(appStateString){
+    if( $("#roomDiv").is(":visible") ) {
+      roomDataReady(appStateString);
+    }
   }
   
   function roomDataReady(appStateString){
@@ -87,7 +93,7 @@
     $('#team1ContentDiv').addClass(_appState.teams[0].color);
     $('#team2ContentDiv').addClass(_appState.teams[1].color);
     
-    var fillPercent = 100 * getTurnEntryIndexes().length / _appState.entries.length;
+    var fillPercent = 100 * currentTurnData().length / _appState.entries.length;
     $('#wordsGuessedFill').height( fillPercent + "%");
     
     $('.roomBtn').hide();

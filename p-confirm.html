@@ -1,11 +1,16 @@
 <div id="confirmDiv" class="component" style="display:none">
-  <div class="row lighten-3" id="">
-    <div class="col s12 center-align" id="">End Turn</div>
+  <div class="row teal lighten-5" id="">
+    <div class="col s10 left-align" id="">Please confirm which words your team guessed during your turn.</div>
+    <div class="col s2 center-align teal lighten-3" id="confirmBtnDiv">
+       <span id="confirmTimeDiv"></span>
+    </div>
   </div>
   <div class="row lighten-3" id="confirmListDiv"></div>
   
-  <div class="row lighten-3" id="">
-    <div class="col s12 center-align" id="confirmTimeDiv"></div>
+  <div class="row lighten-3 valign-wrapper" id="">
+    <div class="col s12 center-align" id="">
+      <a class="waves-effect waves-light btn" id="a-confirm-btn"><i class="material-icons left">check</i>CONFIRM</a>
+    </div>
   </div>
 </div>
 
@@ -15,10 +20,12 @@
   var _confirmCountdownTime;
   
   function initConfirm() {
+    $('#a-confirm-btn').click( function(){ 
+      endConfirm();
+    } );
   }
   
   function showConfirm() {
-    hideAll();
     showProgress();
     
     _confirmDelayInterval = setInterval(delayedShowConfirm, 2500); 
@@ -63,10 +70,14 @@
   function updateConfirmHTML() {
     var div = $('#confirmListDiv');
     div.empty();
-    for( var i = 0; i <= _turnState.index; i++ ){
-      var turnEntry = _turnState.data[i];
+    for( var i = 0; i <= _localTurnState.index && i < _localTurnState.data.length; i++ ){
+      var turnEntry = _localTurnState.data[i];
       div.append(confirmWordHTML(turnEntry.word,i,turnEntry.guessed));
     }
+    $('.checkbox').change(function() {
+      endConfirmCountdown();
+      startConfirmCountdown();
+    });
   }
   
   function confirmWordHTML(word,index,guessed) {
@@ -74,9 +85,9 @@
     html += '<div class="col s12 left-align">';
     html += '  <label>';
     if(guessed)
-      html += '    <input type="checkbox" class="filled-in" checked="checked" id="' + index +'" />';
+      html += '    <input type="checkbox" class="filled-in checkbox" checked="checked" id="ckbox' + index +'" />';
     else
-      html += '    <input type="checkbox" class="filled-in" id="' + index +'" />';
+      html += '    <input type="checkbox" class="filled-in checkbox" id="ckbox' + index +'" />';
     html += '    <span>'+ word +'</span>';
     html += '  </label>';
     html += '</div>';
@@ -85,34 +96,37 @@
   
   function endConfirm() {
     endConfirmCountdown();
-    //syncTurnDataWithGameData();
+    syncTurnDataWithGameData();
+    showProgress();
   }
   
-  /********
   function showResults() {
-    $('.a-turn-next').hide();
-    $('.a-turn-end').hide();
-    $("#timerDiv").hide();
-    var result = "You earned your team " + _currentIndex + " points! "
+    var result = "You earned your team " + turnPoints() + " points! "
     
-    if( _appState.turnState.timeLeft > 0 && _currentRound < 2 ){
+    if( _appState.turnState.timeLeft > 0 && _localTurnState.round < 2 ){
       var timeLeft = _appState.turnState.timeLeft;
-      if( _currentIndex + 1 >= _entryIndexes.length ) {
-        timeLeft = Math.min(timeLeft,_appState.rounds[_currentRound+1].roundLength);
+      if( _localTurnState.index + 1 >= _localTurnState.data.length ) {
+        timeLeft = Math.min(timeLeft,_appState.rounds[_localTurnState.round+1].roundLength);
       }
       result += "<br>You have " + timeLeft + " seconds left";
     }
      
     M.toast({html: result});
   }
-  
-    ******/
+ 
     
   function syncTurnDataWithGameData() {
     var entries = [];
-    for( var i = 0; i < _turnState.data.length; i++ ){
-      if( _turnState.data[i].guessed ){
-        entries.push( _turnState.data[i].gameIndex );
+    for( var i = 0; i <= _localTurnState.index && i < _localTurnState.data.length; i++ ){
+      var checkboxId = "#ckbox" + i;
+      if( $(checkboxId).prop( "checked" ) == true ) {
+        _localTurnState.data[i].guessed = true;
+        entries.push( _localTurnState.data[i].gameIndex );
+      } else {
+        if( _localTurnState.data[i].guessed == true ) {
+          _appState.turnState.timeLeft = 0;
+        }
+        _localTurnState.data[i].guessed = false;
       }
     }
     
@@ -123,6 +137,7 @@
   }
   
   function endTurnCallback(){
+    showResults();
     showHome();
   } 
 
