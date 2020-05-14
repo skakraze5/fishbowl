@@ -1,0 +1,34 @@
+<div id="continueTurnModalDiv" class="modal">
+  <div class="modal-content">
+    <h4>It is still your turn</h4>
+    <p>The round has ended, but you still have <span id="continueTime"></span> seconds left for your turn. The fishbowl has been refilled.</p>
+    <p id="continueRoundInfo"></p>
+    <p>Are you ready?</p>
+  </div>
+  <div class="modal-footer">
+    <a class="modal-close waves-effect waves-green btn" id="a-continue-btn">Ready!</a>
+  </div>
+</div>
+
+<script> 
+  function initContinue() {
+    $('#a-continue-btn').click( function(){ 
+      showHome();
+    } );
+    
+  }
+  
+  function showContinue() {
+    $('#continueRoundInfo').empty();
+    
+    var currentRound = getCurrentRound();
+    if(currentRound in _appState.rounds){
+      var info = _appState.rounds[currentRound].desc + "<br>";
+      $('#continueRoundInfo').html(info);
+    }
+    
+    $('#continueTime').html(_appState.turnState.timeLeft);
+    
+    $('#continueTurnModalDiv').modal("open");
+  }
+</script>

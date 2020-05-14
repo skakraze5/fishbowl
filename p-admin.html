@@ -13,6 +13,7 @@
     <a class="a-admin-toggle waves-effect waves-light btn-small">Edit</a>
     <a class="a-admin-end-turn waves-effect waves-light btn-small">End Turn</a>
     <a class="a-admin-reset-time waves-effect waves-light btn-small">Reset Time</a>
+    <a class="a-admin-continue waves-effect waves-light btn-small">Continue</a>
   </div>
   <div id="adminGameContentDiv">
     <textarea id="adminGameContent"></textarea>
@@ -64,6 +65,10 @@
     
     $('.a-admin-start-game').click( function(){ 
       startGame();
+    } );
+    
+    $('.a-admin-continue').click( function(){ 
+      showContinue();
     } );
   }
   
