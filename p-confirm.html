@@ -97,23 +97,14 @@
   function endConfirm() {
     endConfirmCountdown();
     syncTurnDataWithGameData();
+    showResults();
     showProgress();
   }
   
   function showResults() {
-    var result = "You earned your team " + turnPoints() + " points! "
-    
-    if( _appState.turnState.timeLeft > 0 && _localTurnState.round < 2 ){
-      var timeLeft = _appState.turnState.timeLeft;
-      if( _localTurnState.index + 1 >= _localTurnState.data.length ) {
-        timeLeft = Math.min(timeLeft,_appState.rounds[_localTurnState.round+1].roundLength);
-      }
-      result += "<br>You have " + timeLeft + " seconds left";
-    }
-     
+    var result = "You earned your team " + turnPoints() + " points! "     
     M.toast({html: result});
   }
- 
     
   function syncTurnDataWithGameData() {
     var entries = [];
@@ -121,24 +112,26 @@
       var checkboxId = "#ckbox" + i;
       if( $(checkboxId).prop( "checked" ) == true ) {
         _localTurnState.data[i].guessed = true;
-        entries.push( _localTurnState.data[i].gameIndex );
       } else {
         if( _localTurnState.data[i].guessed == true ) {
-          _appState.turnState.timeLeft = 0;
+          _localTurnState.data[i].skipped = true;
         }
         _localTurnState.data[i].guessed = false;
       }
     }
     
-    var teamName = _appState.teams[_appState.turnState.teamIndex].name;
     google.script.run
        .withSuccessHandler(endTurnCallback)
-       .endTurn(entries, teamName, getCurrentRound(),_appState.turnState.timeLeft);
+       .endTurn(_localTurnState);
   }
   
-  function endTurnCallback(){
-    showResults();
-    showHome();
+  function endTurnCallback(localTurnState){
+    _localTurnState = localTurnState;
+    if(_localTurnState != null){
+      showContinue();
+    } else {
+      showHome();
+    }
   } 
 
   

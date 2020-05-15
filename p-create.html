@@ -32,7 +32,7 @@
     </div>
     <div class="col s1">
       <label>
-        <input id="create-starts-team0" name="create-teamStarts" type="radio" class="with-gap"/>
+        <input id="create-starts-team1" name="create-teamStarts" type="radio" class="with-gap"/>
         <span></span>
       </label>
     </div>
@@ -119,7 +119,7 @@
       var chipData = instance.chipsData;
       
       players[i] = chipData.map(chip => { return chip.tag; });
-      if($("#create-starts-team"+i).prop("checked", true)){
+      if($("#create-starts-team"+i).prop("checked")){
         teamIndexStarts = i;
       }
     }

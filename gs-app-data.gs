@@ -107,14 +107,14 @@ function startTurn() {
   var success = lock.tryLock(10000);
   if (!success) {
     Logger.log('startTurn could not obtain lock after 10 seconds.');
-    return false;
+    return null;
   }
   
   var sp = PropertiesService.getScriptProperties();
   var appDataString = sp.getProperty(dataKey());
   if( !appDataString ) {
     lock.releaseLock();
-    return false; 
+    return null; 
   }
   
   ///////////////////////////////////////////////////
@@ -123,7 +123,7 @@ function startTurn() {
   
   if( appData.turnState.isRunning ) {
     lock.releaseLock();
-    return false; 
+    return null; 
   }
 
   appData.turnState.isRunning = true;
@@ -134,31 +134,46 @@ function startTurn() {
   setCachedData(newDataString);
   
   lock.releaseLock();
-  return true;
+  return createLocalTurnState(appData);
 }
 
-function endTurn(entryIndexes, teamName, round, timeLeft) {  
-  Logger.log("endTurn", entryIndexes, teamName, round, timeLeft);
+function endTurn(localTurnState) {  
   var lock = LockService.getScriptLock();
   var success = lock.tryLock(10000);
   if (!success) {
     Logger.log('endTurn could not obtain lock after 10 seconds.');
-    return;
+    return null;
   }
   
   var sp = PropertiesService.getScriptProperties();
   var appDataString = sp.getProperty(dataKey());
   if( !appDataString ) {
     lock.releaseLock();
-    return; 
+    return null; 
   }
   
   /////////////////////////////////
   //
   var appData = JSON.parse(appDataString);
-  for( var i = 0; i < entryIndexes.length; i++ ) {
-    var index = entryIndexes[i];
-    appData.entries[index].guessers[round] = teamName;
+  Logger.log(appData);
+  Logger.log(localTurnState);
+  
+  var teamName = appData.teams[localTurnState.teamIndex].name;
+  var skipped = false;
+  
+  for( var i = 0; i < localTurnState.data.length; i++ ){
+    if( localTurnState.data[i].guessed ) {
+      var gameIndex = localTurnState.data[i].gameIndex;
+      appData.entries[gameIndex].guessers[localTurnState.round] = teamName;
+    }
+    
+    if( localTurnState.data[i].skipped ) {
+      skipped = true;
+    }
+  }
+
+  if( skipped ){
+    localTurnState.timeLeft = 0;
   }
   
   var roundLength = 30;
@@ -167,7 +182,9 @@ function endTurn(entryIndexes, teamName, round, timeLeft) {
     roundLength = appData.rounds[currentRound].roundLength;
   }
   
-  if( timeLeft <= 0 ) {
+  if( currentRound < 0 ) {
+    appData.turnState.isRunning = false;
+  } else if( localTurnState.timeLeft <= 0 ) {
     var currentTeamIndex = appData.turnState.teamIndex;
     var currentTeam = appData.teams[ currentTeamIndex ];
     if( currentTeam.players.length > 0 ){
@@ -175,11 +192,12 @@ function endTurn(entryIndexes, teamName, round, timeLeft) {
     }
     appData.turnState.teamIndex = (appData.turnState.teamIndex + 1) % 2;
     appData.turnState.timeLeft = roundLength;
+    appData.turnState.isRunning = false;
   } else {
-    appData.turnState.timeLeft = Math.min(timeLeft,roundLength);
+    appData.turnState.timeLeft = Math.min(localTurnState.timeLeft,roundLength);
+    appData.turnState.isRunning = true;
   }
   
-  appData.turnState.isRunning = false;
   
   Logger.log(appData);
   
@@ -190,7 +208,12 @@ function endTurn(entryIndexes, teamName, round, timeLeft) {
   setCachedData(newDataString);
   
   lock.releaseLock();
-  return;
+  
+  if( appData.turnState.isRunning ){
+    return createLocalTurnState(appData);
+  } else {
+    return null;
+  }
 }
 
 function startGame() {  

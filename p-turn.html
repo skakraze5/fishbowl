@@ -47,31 +47,29 @@
        .startTurn();
   }
   
-  function startTurnCallback(isTurn){
+  function startTurnCallback(localTurnState){
     hideAll();
-    _appState.turnState.isRunning = isTurn;
-    if( !_appState.turnState.isRunning ){
+    _localTurnState = localTurnState;
+    if( localTurnState == null ){
       M.toast({html: 'Turn already in progress'});
       showHome();
       return;
     }
     
-    var turnIndex = _appState.turnState.teamIndex;
+    var turnIndex = _localTurnState.teamIndex;
     var notTurnIndex = (turnIndex + 1) % 2;
     
     $('#turnTitleDiv').removeClass(_appState.teams[notTurnIndex].color);
     $('#turnTitleDiv').addClass(_appState.teams[turnIndex].color);
     
-    var currentRound = getCurrentRound();
     $('.a-turn-next').show();
     $("#timerDiv").show();
-    $("#turnRoundInfo").html(_appState.rounds[currentRound].desc);
-    $("#turnTitle").html( "<b>"+_appState.teams[_appState.turnState.teamIndex].name + "</b> turn");
+    $("#turnRoundInfo").html(_appState.rounds[_localTurnState.round].desc);
+    $("#turnTitle").html( "<b>"+_appState.teams[turnIndex].name + "</b> turn");
     startTurn();
   }
   
   function startTurn(){    
-    updateTurnState();
     showCurrentWord();
     
     initTime();
@@ -82,7 +80,7 @@
   var _timerInterval;
   
   function initTime() {
-     $("#timerDiv").html( _appState.turnState.timeLeft + "s" );
+     $("#timerDiv").html( _localTurnState.timeLeft + "s" );
   }
   
   function showCurrentWord() {    
@@ -95,9 +93,9 @@
   }
   
   function updateTime() {
-    _appState.turnState.timeLeft--;
-    $("#timerDiv").html(_appState.turnState.timeLeft + "s");
-    if (_appState.turnState.timeLeft <= 0) {
+    _localTurnState.timeLeft--;
+    $("#timerDiv").html(_localTurnState.timeLeft + "s");
+    if (_localTurnState.timeLeft <= 0) {
       endTimer();
     }
   }

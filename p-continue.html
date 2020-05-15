@@ -11,23 +11,31 @@
 </div>
 
 <script> 
+  var _continueDelayInterval;
+
   function initContinue() {
     $('#a-continue-btn').click( function(){ 
-      showHome();
+      _continueDelayInterval = setInterval(delayedStartTurn, 2500); 
     } );
   }
   
   function showContinue() {
     $('#continueRoundInfo').empty();
     
-    var currentRound = getCurrentRound();
+    var currentRound = _localTurnState.round;
     if(currentRound in _appState.rounds){
       var info = _appState.rounds[currentRound].desc + "<br>";
       $('#continueRoundInfo').html(info);
     }
     
-    $('#continueTime').html(_appState.turnState.timeLeft);
+    $('#continueTime').html(_localTurnState.timeLeft);
     
     $('#continueTurnModalDiv').modal("open");
   }
+  
+  function delayedStartTurn(){
+    clearInterval(_continueDelayInterval);
+    startTurnCallback(_localTurnState);
+  }
+  
 </script>

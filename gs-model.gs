@@ -49,3 +49,58 @@ function createGameState(gameKey) {
 
   return gameState;
 }
+
+function createLocalTurnState(appState){
+  var localTurnState = appState.turnState;
+  
+  localTurnState.data = shuffledTurnData(appState);
+  localTurnState.index = 0;
+  localTurnState.round = getCurrentRound(appState);
+  
+  return localTurnState;
+}
+
+function shuffledTurnData(appState) {
+  return shuffle(currentTurnData(appState));
+}
+
+function currentTurnData(appState) {
+  var currentRound = getCurrentRound(appState);
+  var turnData = [];
+  for (var i = 0; i < appState.entries.length; i++) {
+    var gameEntry = appState.entries[i];
+    if (gameEntry.guessers[currentRound] == "") {
+      turnData.push(createTurnDataEntry(gameEntry.word, i));
+    }
+  }
+  return turnData;
+}
+
+function createTurnDataEntry(word, gameIndex) {
+  var turnEntry = {};
+  turnEntry.word = word;
+  turnEntry.gameIndex = gameIndex;
+  turnEntry.guessed = false;
+  turnEntry.skipped = false;
+  return turnEntry;
+}
+
+function shuffle(array) {
+  var currentIndex = array.length,
+    temporaryValue, randomIndex;
+
+  // While there remain elements to shuffle...
+  while (0 !== currentIndex) {
+
+    // Pick a remaining element...
+    randomIndex = Math.floor(Math.random() * currentIndex);
+    currentIndex -= 1;
+
+    // And swap it with the current element.
+    temporaryValue = array[currentIndex];
+    array[currentIndex] = array[randomIndex];
+    array[randomIndex] = temporaryValue;
+  }
+
+  return array;
+}

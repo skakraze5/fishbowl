@@ -1,50 +1,18 @@
 <script>
-  var _localTurnState = defaultTurnState();
+  var _localTurnState = null;
   
-  function updateTurnState() {
-    _localTurnState = newTurnState();
-  }
-  
-  function defaultTurnState() {
-    var turnState = {};
-    turnState.data = [createTurnDataEntry("Bob",0)];
-    turnState.index = 0;
-    turnState.round = -1;
-    return turnState;
-  }
-
-  function newTurnState() {
-    var turnState = defaultTurnState();
-    turnState.data = shuffledTurnData();
-    turnState.round = getCurrentRound();
-    return turnState;
-  }
-  
-  function currentTurnData() {
+  function getNumWordsLeftInRound() {
     var currentRound = getCurrentRound();
-    var turnData = [];
+    var numWordsLeftInRound = 0;
     for( var i = 0; i < _appState.entries.length; i++ ){
       var gameEntry = _appState.entries[i];
       if( gameEntry.guessers[currentRound] == "" ){
-        turnData.push(createTurnDataEntry(gameEntry.word,i));
+        numWordsLeftInRound++;
       }
     }
-    return turnData;
+    return numWordsLeftInRound;
   }
-  
-  function shuffledTurnData() {
-    return shuffle(currentTurnData());
-  }
-  
-  function createTurnDataEntry(word,gameIndex) {
-    var turnEntry = {};
-    turnEntry.word = word;
-    turnEntry.gameIndex = gameIndex;
-    turnEntry.guessed = false;
-    turnEntry.skipped = false;
-    return turnEntry;
-  }
-  
+    
   function currentWord() {
     if( _localTurnState.index < _localTurnState.data.length ){
       return _localTurnState.data[_localTurnState.index].word;
@@ -66,24 +34,5 @@
       }
     }
     return points;
-  }
-  
-  function shuffle(array) {
-    var currentIndex = array.length, temporaryValue, randomIndex;
-  
-    // While there remain elements to shuffle...
-    while (0 !== currentIndex) {
-  
-      // Pick a remaining element...
-      randomIndex = Math.floor(Math.random() * currentIndex);
-      currentIndex -= 1;
-  
-      // And swap it with the current element.
-      temporaryValue = array[currentIndex];
-      array[currentIndex] = array[randomIndex];
-      array[randomIndex] = temporaryValue;
-    }
-  
-    return array;
   }
 </script>

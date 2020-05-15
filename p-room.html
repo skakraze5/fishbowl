@@ -93,7 +93,7 @@
     $('#team1ContentDiv').addClass(_appState.teams[0].color);
     $('#team2ContentDiv').addClass(_appState.teams[1].color);
     
-    var fillPercent = 100 * currentTurnData().length / _appState.entries.length;
+    var fillPercent = 100 * getNumWordsLeftInRound() / _appState.entries.length;
     $('#wordsGuessedFill').height( fillPercent + "%");
     
     $('.roomBtn').hide();
