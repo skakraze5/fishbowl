@@ -42,15 +42,21 @@
     } );
   }
   
-  function silentlyRefreshDoor() {
-    if( $("#doorDiv").is(":visible") ) {
-      refreshAppStateWithCallback(doorDataReady);
-    }
-  }
-  
   function showDoor() {
     showProgress();
     refreshAppStateWithCallback(doorDataReady);
+  }
+  
+  function silentlyRefreshDoor() {
+    if( $("#doorDiv").is(":visible") ) {
+      refreshAppStateWithCallback(silentDoorDataReady);
+    }
+  }
+  
+  function silentDoorDataReady(appStateString){
+    if( $("#doorDiv").is(":visible") ) {
+      doorDataReady(appStateString);
+    }
   }
   
   function doorDataReady(appStateString){
