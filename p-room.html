@@ -45,6 +45,11 @@
     <div class="col s6 right-align teal lighten-3" id="playerSuggestion"> 
     </div>
   </div>
+  <div class="row" id="guessersSuggestionDiv">
+    <div class="col s6 left-align teal lighten-5">Current Guessers:</div>
+    <div class="col s6 right-align teal lighten-3" id="guessersSuggestion"> 
+    </div>
+  </div>
 </div>
 
 <script> 
@@ -98,6 +103,7 @@
     
     $('.roomBtn').hide();
     $('#playerSuggestionDiv').hide();
+    $('#guessersSuggestionDiv').hide();
     
     if( isGameOver() ) {
       $('#roomGameInfo').html("<h2>Game over</h2>");
@@ -107,6 +113,21 @@
     if( _appState.entries.length > 0 ){
       var info = _appState.rounds[getCurrentRound()].desc + "<br>";
       $('#roomGameInfo').html(info);
+    }
+    
+    var player = currentPlayer();
+    if( player != "" ){
+      $('#playerSuggestionDiv').show();
+      $('#playerSuggestion').html(player);
+      
+      var guessers = currentGuessers();
+      var guesserHtml = "";
+      guessers.forEach(guesser => { guesserHtml += guesser + "<br>"; });
+      
+      if(guesserHtml != ""){
+        $('#guessersSuggestionDiv').show();
+        $('#guessersSuggestion').html(guesserHtml);
+      }
     }
     
     if( _appState.turnState.isRunning || _appState.entries.length == 0 ) {
@@ -121,12 +142,6 @@
       $('.team2Turn').show();
     }
     
-    var player = currentPlayer();
-    if( player != "" ){
-      $('#playerSuggestionDiv').show();
-      $('#playerSuggestion').html(player);
-    }
-    
   }
   
   function currentPlayer(){
@@ -138,6 +153,22 @@
     }
       
     return "";
+  }
+  
+  function currentGuessers(){
+    var guessers = [];
+    var currentTeamIndex = _appState.turnState.teamIndex;
+    var currentPlayerIndex = _appState.teams[currentTeamIndex].playerIndex;
+    var currentTeamPlayers = _appState.teams[currentTeamIndex].players;
+    if( currentPlayer() != "" ){
+      for(var i = 0; i < currentTeamPlayers.length; i++){
+        if(i !== currentPlayerIndex){
+          guessers.push(currentTeamPlayers[i]);
+        }
+      }
+    }
+      
+    return guessers;
   }
 
 </script>
