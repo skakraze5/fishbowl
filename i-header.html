@@ -3,11 +3,13 @@
     <a class="brand-logo a-home">Fish Bowl</a>
     <a data-target="mobile-demo" class="sidenav-trigger"><i class="material-icons">menu</i></a>
     <ul class="right hide-on-med-and-down">
+      <li><a class="a-create">Create Game</a></li>
       <li><a class="a-admin">Admin</a></li>
     </ul>
   </div>
 </nav>
 <ul class="sidenav" id="mobile-demo">
+  <li><a class="a-create">Create Game</a></li>
   <li><a class="a-admin">Admin</a></li>
 </ul>
 
@@ -22,8 +24,9 @@
   }
   
   function initNavLinks(){
-    $('.a-home').click(  function(){ showHome();  });
+    $('.a-home').click( function(){ showHome();  });
     $('.a-admin').click( function(){ showAdmin(); });
+    $('.a-create').click( function(){ showCreate(); });
   }
 
 </script>

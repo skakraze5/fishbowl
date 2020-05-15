@@ -6,6 +6,7 @@
 <script>  
   var _appState = {};
   var _gameKey = "";
+  var _isOwner = false;
   
   // Window OnLoad
   $(function() {
@@ -24,6 +25,7 @@
     initGate(); // p-gate.html
     initConfirm(); // p-confirm.html
     initContinue();
+    initCreate()
   }
     
   function hideAll() {

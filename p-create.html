@@ -1,0 +1,153 @@
+<div id="createDiv" class="component" style="display:none">
+  <div class="row">
+    <div class="col s12 title">Create New Game</div>
+    <div class="input-field col s12">
+      <i class="material-icons prefix">videogame_asset</i>
+      <input id="create-GameKey" type="text" class="validate lowercase" required autocomplete="off">
+      <label for="create-GameKey" >Game Key</label>
+    </div>
+  </div>
+
+  <div class="row valign-wrapper">
+    <div class="col s2 center-align">
+      <i id="create-teamIcon0" class="material-icons prefix text-lighten-3 medium">account_circle</i>
+    </div>
+    <div class="col s9">
+      <div id="create-newPlayers0" class="chips chips-placeholder new-player-placeholder"></div>
+    </div>
+    <div class="col s1">
+      <label>
+        <input id="create-starts-team0" name="create-teamStarts" type="radio" class="with-gap" checked />
+        <span></span>
+      </label>
+    </div>
+  </div>
+  
+  <div class="row valign-wrapper">
+    <div class="col s2 center-align">
+      <i id="create-teamIcon1" class="material-icons prefix text-lighten-3 medium">account_circle</i>
+    </div>
+    <div class="col s9">
+      <div id="create-newPlayers1" class="chips chips-placeholder new-player-placeholder"></div>
+    </div>
+    <div class="col s1">
+      <label>
+        <input id="create-starts-team0" name="create-teamStarts" type="radio" class="with-gap"/>
+        <span></span>
+      </label>
+    </div>
+  </div>
+  
+  <div class="row">
+    <div class="col s12 center-align">
+      <a id="create-btn" class="btn-floating pulse"><i class="material-icons">check</i></a>
+    </div>
+  </div>
+  
+</div>
+
+<script> 
+  
+  function initCreate() { 
+    $('.chips-placeholder').chips({
+      placeholder: 'Add Players'
+    });
+    
+    $('.new-player-placeholder').focusin(function(event) {
+      var instance = M.Chips.getInstance(event.currentTarget);
+      instance.options.secondaryPlaceholder = '+Player';
+    });
+    
+    $('.new-player-placeholder').focusout(function(event) {
+      var instance = M.Chips.getInstance(event.currentTarget);
+      var hangingValue = instance.$input[0].value;
+      if( hangingValue != '' ){
+        instance.addChip({tag:hangingValue});
+        instance.$input[0].value = '';
+      }
+      
+    });
+    
+    $('#create-btn').click( createNewGame );
+  }
+  
+  function showCreate() {
+    showProgress();
+    refreshAppStateWithCallback(createDataReady);
+  }
+  
+  function createDataReady( appStateString ) {
+    updateAppState( appStateString );
+    hideAll();
+    $('#createDiv').show();
+    
+    for( var i = 0; i < _appState.teams.length; i++ ) {
+      $("#create-teamIcon"+i).addClass(_appState.teams[i].color+"-text");
+    }
+    
+    var gameKeyCookie = Cookies.get('gameKey');
+    if( gameKeyCookie ) {
+      $("#create-GameKey").val(gameKeyCookie);
+    }
+    
+    M.updateTextFields();
+  }
+  
+  function isCreateInputValid(){
+    var gameKeys = $("#create-GameKey");
+    for ( var i = 0; i < gameKeys.length; i++) {
+      if( ! gameKeys[i].checkValidity() ) {
+        return false;
+      }
+    }
+    return true;
+  }
+  
+  function createNewGame() {
+    if( !isCreateInputValid() ){ 
+      return; 
+    }
+      
+    var gameKey = $("#create-GameKey")[0].value.toLowerCase();
+    Cookies.set('gameKey', gameKey, { expires: 1 });
+    
+    var players = [[],[]];
+    var teamIndexStarts = 0;
+    for( var i = 0; i < _appState.teams.length; i++ ) {
+      var chipElement = $("#create-newPlayers"+i);
+      var instance = M.Chips.getInstance(chipElement);
+      var chipData = instance.chipsData;
+      
+      players[i] = chipData.map(chip => { return chip.tag; });
+      if($("#create-starts-team"+i).prop("checked", true)){
+        teamIndexStarts = i;
+      }
+    }
+    
+    if( !isGameOver() ){
+      if( !confirm("A game is already in progress. Are you sure you want to create a new game? This will reset the current game.") ){
+        return;
+      }
+    }
+    
+    console.log(players);
+    google.script.run
+       .withSuccessHandler(gameCreated)
+       .createGame(gameKey,players,teamIndexStarts);
+       
+    showProgress();
+  }
+  
+  function gameCreated(isGameCreate){
+    if(isGameCreate) {
+      var gameKey = Cookies.get('gameKey');
+      _gameKey = gameKey;
+      _isOwner = true;
+      showHome();
+    } else {
+      M.toast({html: 'A new game could not be created'});
+      refreshAppStateWithCallback(createDataReady);
+    }
+  }
+  
+</script>

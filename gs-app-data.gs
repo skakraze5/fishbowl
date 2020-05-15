@@ -246,3 +246,26 @@ function enterGame(gameKey) {
   
   return ""; 
 }
+
+function createGame(gameKey, players, startingTeamIndex) {  
+  var lock = LockService.getScriptLock();
+  var success = lock.tryLock(10000);
+  if (!success) {
+    Logger.log('Could not obtain lock after 10 seconds.');
+    return false;
+  }
+  
+  var newAppState = defaultAppState(gameKey);
+  newAppState.teams[0].players = players[0];
+  newAppState.teams[1].players = players[1];
+  newAppState.turnState.teamIndex = startingTeamIndex;
+  
+  var newDataString = JSON.stringify(newAppState);
+ 
+  var sp = PropertiesService.getScriptProperties();
+  sp.setProperty(dataKey(), newDataString);
+  setCachedData(newDataString);
+  
+  lock.releaseLock();
+  return newDataString;
+}

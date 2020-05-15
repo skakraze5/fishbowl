@@ -3,6 +3,9 @@
     <div class="col s9 left-align title">
       <b>Add Words</b>
     </div>
+    <div id="a-door-play-div" class="col s1 right-align">
+      <a class="a-door-play btn-floating pulse"><i class="material-icons">play_circle_outline</i></a>
+    </div>
     <div class="col s3 right-align">
       <a class="a-door-form btn-floating pulse"><i class="material-icons">add_circle_outline</i></a>
     </div>
@@ -33,6 +36,10 @@
     $('.a-door-startGame').click( function(){
       startGame( );           
     } );
+    
+    $('.a-door-play').click( function(){ 
+      startGame();
+    } );
   }
   
   function silentlyRefreshDoor() {
@@ -59,7 +66,7 @@
     $('#doorDiv').show();
     $('#doorNumberOfWords').html(_appState.entries.length);
     
-      
+    var numPlayers = 0;  
     for( var teamIndex = 0; teamIndex < _appState.teams.length; teamIndex++ ) {
       var divID = '#doorTeam'+teamIndex+'ContentDiv';
       var team = _appState.teams[teamIndex];
@@ -68,11 +75,26 @@
       var divHtml = '<b>' + team.name +':</b><br>'
       var players = team.players;
       for( var playerIndex = 0; playerIndex < players.length; playerIndex++){
-        divHtml += players[playerIndex] + '<br>'
+        divHtml += players[playerIndex] + '<br>';
+        numPlayers++;
       }
       
       $(divID).html( divHtml );
         
+    }
+    
+    if(numPlayers == 0){
+      if( _isOwner ){
+        $('#a-door-play-div').show();
+      } else {
+        $('#a-door-play-div').hide();
+      }
+    } else {
+      if( _appState.entries.length >= numPlayers * 3){
+        $('#a-door-play-div').show();
+      } else {
+        $('#a-door-play-div').hide();
+      }
     }
     
     
