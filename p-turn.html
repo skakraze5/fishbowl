@@ -44,7 +44,7 @@
     
     google.script.run
        .withSuccessHandler(startTurnCallback)
-       .startTurn();
+       .startTurn(_gameKey);
   }
   
   function startTurnCallback(localTurnState){

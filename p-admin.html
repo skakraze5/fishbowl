@@ -98,7 +98,7 @@
     showProgress();
     google.script.run
        .withSuccessHandler(startGameCallback)
-       .startGame();
+       .startGame(_gameKey);
   }
   
   function startGameCallback(hasStarted) {

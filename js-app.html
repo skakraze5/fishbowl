@@ -105,7 +105,7 @@
   function pushAppStateWithCallback(callback) {
     google.script.run
        .withSuccessHandler(callback)
-       .setAppState(_appState);
+       .setAppState(_gameKey,_appState);
   }
   
   function refreshAppState() {
@@ -115,7 +115,7 @@
   function refreshAppStateWithCallback(callback) {
     google.script.run
        .withSuccessHandler(callback)
-       .getAppStateAsString();
+       .getAppStateAsString(_gameKey);
   }
 
 </script>

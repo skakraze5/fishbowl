@@ -92,7 +92,7 @@
     console.log( "addWords", entries );
     google.script.run
        .withSuccessHandler(entriesAdded)
-       .addEntries(entries);
+       .addEntries(_gameKey,entries);
        
     showProgress();
   }

@@ -17,7 +17,7 @@ function resetAppState(gameKey) {
   return newDataString;
 }
 
-function getAppStateAsString() {
+function getAppStateAsString(gameKey) {
   var cached = getCachedData();
   if( cached != null ) {
     return cached;
@@ -45,7 +45,7 @@ function getAppStateAsString() {
   return dataString;
 }
 
-function setAppState(data) {
+function setAppState(gameKey,data) {
   var sp = PropertiesService.getScriptProperties();
   var oldDataString = sp.getProperty(dataKey());
   
@@ -66,7 +66,7 @@ function setAppState(data) {
   return newDataString;
 }
 
-function addEntries(newEntries) {  
+function addEntries(gameKey,newEntries) {  
   var lock = LockService.getScriptLock();
   var success = lock.tryLock(10000);
   if (!success) {
@@ -102,7 +102,7 @@ function addEntries(newEntries) {
   return words;
 }
 
-function startTurn() {  
+function startTurn(gameKey) {  
   var lock = LockService.getScriptLock();
   var success = lock.tryLock(10000);
   if (!success) {
@@ -137,7 +137,7 @@ function startTurn() {
   return createLocalTurnState(appData);
 }
 
-function endTurn(localTurnState) {  
+function endTurn(gameKey,localTurnState) {  
   var lock = LockService.getScriptLock();
   var success = lock.tryLock(10000);
   if (!success) {
@@ -216,7 +216,7 @@ function endTurn(localTurnState) {
   }
 }
 
-function startGame() {  
+function startGame(gameKey) {  
   var lock = LockService.getScriptLock();
   var success = lock.tryLock(10000);
   if (!success) {
