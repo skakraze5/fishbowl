@@ -9,6 +9,20 @@ function getCurrentRound(appState){
   return -1;
 }
 
+function isGameOver(appState) {
+  if( appState.entries.length == 0 ) {
+    return false;
+  }
+  for( var round = 0; round < appState.rounds.length; round++ ) {
+    for( var i = 0; i < appState.entries.length; i++ ){
+      if( appState.entries[i].guessers[round] == "" ){
+        return false;
+      }
+    }
+  }
+  return true;
+}
+
 function setCachedData(gameKey,dataString) {
   if( dataString != null ) {
     var cache = CacheService.getScriptCache();

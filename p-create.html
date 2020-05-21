@@ -123,13 +123,7 @@
         teamIndexStarts = i;
       }
     }
-    
-    if( !isGameOver() ){
-      if( !confirm("A game is already in progress. Are you sure you want to create a new game? This will reset the current game.") ){
-        return;
-      }
-    }
-    
+        
     console.log(players);
     google.script.run
        .withSuccessHandler(gameCreated)
@@ -138,14 +132,14 @@
     showProgress();
   }
   
-  function gameCreated(isGameCreate){
-    if(isGameCreate) {
+  function gameCreated(isGameCreated){
+    if(isGameCreated) {
       var gameKey = Cookies.get('gameKey');
       _gameKey = gameKey;
       _isOwner = true;
       refreshAppState();
     } else {
-      M.toast({html: 'A new game could not be created'});
+      M.toast({html: 'A new game could not be created with that game key'});
       refreshAppStateWithCallback(createDataReady);
     }
   }

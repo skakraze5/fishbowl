@@ -292,6 +292,15 @@ function createGame(gameKey, players, startingTeamIndex) {
     Logger.log('Could not obtain lock after 10 seconds.');
     return false;
   }
+  var sp = PropertiesService.getScriptProperties();
+  var appDataString = sp.getProperty(dataKey(gameKey));
+  if( appDataString ) {
+    var appData = JSON.parse(appDataString);
+    if( !isGameOver(appData) ){
+      Logger.log('Game already in progress');
+      return false; 
+    }
+  }
   
   var newAppState = defaultAppState(gameKey);
   newAppState.teams[0].players = players[0];
@@ -299,8 +308,6 @@ function createGame(gameKey, players, startingTeamIndex) {
   newAppState.turnState.teamIndex = startingTeamIndex;
   
   var newDataString = JSON.stringify(newAppState);
- 
-  var sp = PropertiesService.getScriptProperties();
   sp.setProperty(dataKey(gameKey), newDataString);
   setCachedData(gameKey,newDataString);
   
