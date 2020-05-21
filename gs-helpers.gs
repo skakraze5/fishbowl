@@ -9,16 +9,16 @@ function getCurrentRound(appState){
   return -1;
 }
 
-function setCachedData(dataString) {
+function setCachedData(gameKey,dataString) {
   if( dataString != null ) {
     var cache = CacheService.getScriptCache();
-    cache.put( dataKey(), dataString, 1500); // cache for 25 minutes
+    cache.put( dataKey(gameKey), dataString, 1500); // cache for 25 minutes
   }
 }
 
-function getCachedData() {
+function getCachedData(gameKey) {
   var cache = CacheService.getScriptCache();
-  return cache.get( dataKey() );
+  return cache.get( dataKey(gameKey) );
 }
 
 function environment(){
@@ -26,7 +26,15 @@ function environment(){
   return url.split( '/' )[6]; 
 }
 
-function dataKey() {
-  var key = environment() + "key";
+function dataKey(gameKey) {
+  var key = environment() + gameKey + "key";
   return key;
+}
+
+function isValidGameKey(gameKey) {
+  if(!gameKey){
+    return false; 
+  } else {
+    return true; 
+  }
 }

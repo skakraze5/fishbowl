@@ -1,3 +1,12 @@
+function invalidAppStateString() {
+  return defaultAppStateString("");
+}
+
+function defaultAppStateString(gameKey) {
+  var appState = defaultAppState(gameKey);
+  return JSON.stringify(appState); 
+}
+
 function defaultAppState(gameKey) {
   var appState = {};
   appState.entries = [];

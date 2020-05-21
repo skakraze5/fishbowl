@@ -1,4 +1,8 @@
 function resetAppState(gameKey) {
+  if( !isValidGameKey(gameKey) ){
+    return false; 
+  }
+  
   var lock = LockService.getScriptLock();
   var success = lock.tryLock(10000);
   if (!success) {
@@ -6,20 +10,23 @@ function resetAppState(gameKey) {
     return false;
   }
   
-  var newAppState = defaultAppState(gameKey);
-  var newDataString = JSON.stringify(newAppState);
+  var newDataString = defaultAppStateString(gameKey);
   
   var sp = PropertiesService.getScriptProperties();
-  sp.setProperty(dataKey(), newDataString);
-  setCachedData(newDataString);
+  sp.setProperty(dataKey(gameKey), newDataString);
+  setCachedData(gameKey,newDataString);
   
   lock.releaseLock();
   return newDataString;
 }
 
 function getAppStateAsString(gameKey) {
-  var cached = getCachedData();
-  if( cached != null ) {
+  if( !isValidGameKey(gameKey) ){
+    return invalidAppStateString(); 
+  }
+  
+  var cached = getCachedData(gameKey);
+  if( !cached ) {
     return cached;
   } 
   
@@ -27,16 +34,15 @@ function getAppStateAsString(gameKey) {
   var lockSuccess = lock.tryLock(2000); // 2 seconds
   
   var sp = PropertiesService.getScriptProperties();
-  var dataString = sp.getProperty(dataKey());
+  var dataString = sp.getProperty(dataKey(gameKey));
   
   if( !dataString ) {
-    var emptyGameKey = "";
-    var appState = defaultAppState(emptyGameKey);
-    dataString = JSON.stringify(appState);
+    gameKey = "";
+    dataString = defaultAppStateString(gameKey);
   }
   
   if (lockSuccess) {
-    setCachedData(dataString);
+    setCachedData(gameKey,dataString);
   } else {
     Logger.log("Could not obtain lock to update cache"); 
   }
@@ -46,8 +52,12 @@ function getAppStateAsString(gameKey) {
 }
 
 function setAppState(gameKey,data) {
+  if( !isValidGameKey(gameKey) ){
+    return invalidAppStateString(); 
+  }
+  
   var sp = PropertiesService.getScriptProperties();
-  var oldDataString = sp.getProperty(dataKey());
+  var oldDataString = sp.getProperty(dataKey(gameKey));
   
   var lock = LockService.getScriptLock();
   var success = lock.tryLock(10000);
@@ -57,8 +67,8 @@ function setAppState(gameKey,data) {
   }
   
   var newDataString = JSON.stringify(data);
-  sp.setProperty(dataKey(), newDataString);
-  setCachedData(newDataString);
+  sp.setProperty(dataKey(gameKey), newDataString);
+  setCachedData(gameKey,newDataString);
   
   lock.releaseLock();
   
@@ -75,7 +85,7 @@ function addEntries(gameKey,newEntries) {
   }
   
   var sp = PropertiesService.getScriptProperties();
-  var appDataString = sp.getProperty(dataKey());
+  var appDataString = sp.getProperty(dataKey(gameKey));
   if( !appDataString ) {
     lock.releaseLock();
     return null; 
@@ -94,11 +104,10 @@ function addEntries(gameKey,newEntries) {
   }
 
   var newDataString = JSON.stringify(appData);
-  sp.setProperty(dataKey(), newDataString);
-  setCachedData(newDataString);
+  sp.setProperty(dataKey(gameKey), newDataString);
+  setCachedData(gameKey,newDataString);
   
   lock.releaseLock();
-  
   return words;
 }
 
@@ -111,7 +120,7 @@ function startTurn(gameKey) {
   }
   
   var sp = PropertiesService.getScriptProperties();
-  var appDataString = sp.getProperty(dataKey());
+  var appDataString = sp.getProperty(dataKey(gameKey));
   if( !appDataString ) {
     lock.releaseLock();
     return null; 
@@ -130,8 +139,8 @@ function startTurn(gameKey) {
   //////////////////////////////////////////////////
   
   var newDataString = JSON.stringify(appData);
-  sp.setProperty(dataKey(), newDataString);
-  setCachedData(newDataString);
+  sp.setProperty(dataKey(gameKey), newDataString);
+  setCachedData(gameKey,newDataString);
   
   lock.releaseLock();
   return createLocalTurnState(appData);
@@ -146,7 +155,7 @@ function endTurn(gameKey,localTurnState) {
   }
   
   var sp = PropertiesService.getScriptProperties();
-  var appDataString = sp.getProperty(dataKey());
+  var appDataString = sp.getProperty(dataKey(gameKey));
   if( !appDataString ) {
     lock.releaseLock();
     return null; 
@@ -198,14 +207,12 @@ function endTurn(gameKey,localTurnState) {
     appData.turnState.isRunning = true;
   }
   
-  
   Logger.log(appData);
-  
   /////////////////
 
   var newDataString = JSON.stringify(appData);
-  sp.setProperty(dataKey(), newDataString);
-  setCachedData(newDataString);
+  sp.setProperty(dataKey(gameKey), newDataString);
+  setCachedData(gameKey,newDataString);
   
   lock.releaseLock();
   
@@ -225,7 +232,7 @@ function startGame(gameKey) {
   }
   
   var sp = PropertiesService.getScriptProperties();
-  var appDataString = sp.getProperty(dataKey());
+  var appDataString = sp.getProperty(dataKey(gameKey));
   if( !appDataString ) {
     lock.releaseLock();
     return false; 
@@ -244,21 +251,25 @@ function startGame(gameKey) {
   //////////////////////////////////////////////////
   
   var newDataString = JSON.stringify(appData);
-  sp.setProperty(dataKey(), newDataString);
-  setCachedData(newDataString);
+  sp.setProperty(dataKey(gameKey), newDataString);
+  setCachedData(gameKey,newDataString);
   
   lock.releaseLock();
   return true;
 }
 
 function enterGame(gameKey) {
-  var dataString = getCachedData();
-  if( dataString == null ) {
+  if( !isValidGameKey(gameKey) ){
+    return ""; 
+  }
+  
+  var dataString = getCachedData(gameKey);
+  if( !dataString ) {
     var sp = PropertiesService.getScriptProperties();
-    var dataString = sp.getProperty(dataKey());
+    dataString = sp.getProperty(dataKey(gameKey));
   } 
   
-  if( dataString == null ) {
+  if( !dataString ) {
     return ""; 
   }
   
@@ -271,6 +282,10 @@ function enterGame(gameKey) {
 }
 
 function createGame(gameKey, players, startingTeamIndex) {  
+  if( !isValidGameKey(gameKey) ){
+    return false; 
+  }
+  
   var lock = LockService.getScriptLock();
   var success = lock.tryLock(10000);
   if (!success) {
@@ -286,9 +301,9 @@ function createGame(gameKey, players, startingTeamIndex) {
   var newDataString = JSON.stringify(newAppState);
  
   var sp = PropertiesService.getScriptProperties();
-  sp.setProperty(dataKey(), newDataString);
-  setCachedData(newDataString);
+  sp.setProperty(dataKey(gameKey), newDataString);
+  setCachedData(gameKey,newDataString);
   
   lock.releaseLock();
-  return newDataString;
+  return true;
 }
