@@ -52,3 +52,10 @@ function isValidGameKey(gameKey) {
     return true; 
   }
 }
+
+function logScriptPropertyKeys(){
+  var sp = PropertiesService.getScriptProperties(); 
+  var keys = sp.getKeys();
+  Logger.log('getSciptPropertyKeys', keys);
+  //sp.deleteProperty("execfruitkey");
+}
